@@ -1,8 +1,3 @@
-cd ~/SISOP-5-2026-IT-124
-cat > make_readme.sh <<'EOF'
-#!/bin/bash
-
-cat > README.md <<'MD'
 # SISOP-5-2026-IT-124
 
 * **Nama**  : Ndaru Satria Tama
