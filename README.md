@@ -1,3 +1,8 @@
+cd ~/SISOP-5-2026-IT-124
+cat > make_readme.sh <<'EOF'
+#!/bin/bash
+
+cat > README.md <<'MD'
 # SISOP-5-2026-IT-124
 
 * **Nama**  : Ndaru Satria Tama
@@ -10,6 +15,7 @@
 
 ```text
 .
+├── README.md
 ├── soal_1
 │   ├── backup.sh
 │   ├── iso.sh
@@ -26,76 +32,20 @@
     ├── kernel.c
     ├── Makefile
     └── README.md
-```
 
 Catatan:
 
-* Folder `soal_1/osboot` dapat kosong pada ZIP awal. Folder ini akan terisi setelah `kernel.sh`, `single.sh`, `multi.sh`, dan `iso.sh` dijalankan.
-* File hasil build Soal 2 seperti `floppy.img`, `kernel.bin`, `kernel.o`, `kernel-asm.o`, `bootloader.bin`, dan `bochslog.txt` tidak disimpan dalam struktur final karena file tersebut dapat dibuat ulang dengan `./build.sh`.
-* Semua langkah run dimulai dari root repository, yaitu folder yang berisi `soal_1` dan `soal_2`.
+Folder soal_1/osboot dapat kosong pada ZIP awal karena isinya dibuat saat runtime.
+File hasil build Soal 2 seperti floppy.img, kernel.bin, kernel.o, dan bootloader.bin tidak disimpan dalam struktur final karena dapat dibuat ulang dengan ./build.sh.
+Semua command dijalankan dari root repository, yaitu folder yang berisi soal_1 dan soal_2.
+Pendahuluan
 
----
+Pada Modul 5 Sistem Operasi ini, saya mengerjakan dua soal utama.
 
-# Pendahuluan
-
-Pada Modul 5 Sistem Operasi ini, saya mengerjakan dua soal yang berhubungan dengan proses pembuatan sistem operasi sederhana, pembuatan root filesystem, booting menggunakan QEMU, pembuatan ISO bootable, serta pembuatan kernel sederhana 16-bit yang dijalankan menggunakan Bochs.
-
-Secara garis besar:
-
-* **Soal 1** membuat environment bootable menggunakan Linux kernel 6.1.1, initramfs single-user, initramfs multi-user, ISO bootable, script QEMU, networking, package manager sederhana, dan backup hasil build.
-* **Soal 2** membuat sistem operasi sederhana berbasis template bootloader dan kernel 16-bit. OS ini menerima input keyboard, menampilkan output ke layar, dan menjalankan command seperti `check`, `add`, `sub`, `fac`, `season`, `triangle`, `clear`, `help`, dan `about`.
-
-Modul ini memperlihatkan bagaimana sistem operasi melakukan proses boot, bagaimana filesystem awal dibuat, bagaimana user dan permission diatur, bagaimana kernel sederhana membaca keyboard, serta bagaimana emulator seperti QEMU dan Bochs digunakan untuk menjalankan sistem operasi.
-
----
-
-# Cara Menjalankan Program
-
-Bagian ini ditulis untuk kondisi ketika seseorang baru saja mengekstrak ZIP final. Semua langkah dimulai dari folder utama repository.
-
-Folder utama repository adalah folder yang berisi:
-
-```text
-soal_1  soal_2
-```
-
-## 1. Masuk ke folder hasil extract ZIP
-
-Contoh:
-
-```bash
-cd ~/SISOP-5-2026-IT-124
-```
-
-Jika nama folder berbeda, sesuaikan dengan lokasi folder hasil extract.
-
-## 2. Pastikan berada di root repository
-
-```bash
-ls
-```
-
-Output yang diharapkan:
-
-```text
-soal_1  soal_2
-```
-
----
-
-# Requirement Umum
-
-Requirement ini dijalankan satu kali sebelum menjalankan soal.
-
-## 1. Update package list
-
-```bash
+Soal 1 membuat sistem bootable berbasis Linux kernel 6.1.1. Sistem ini memiliki mode single-user, multi-user, ISO bootable, QEMU runner, networking, package manager sederhana, dan backup hasil build.
+Soal 2 membuat sistem operasi sederhana 16-bit menggunakan bootloader, kernel assembly, dan kernel C. OS ini dijalankan menggunakan Bochs dan memiliki command shell seperti check, add, sub, fac, season, triangle, clear, help, dan about.
+Requirement Umum
 sudo apt update
-```
-
-## 2. Install dependency Soal 1 dan Soal 2
-
-```bash
 sudo apt install -y \
   build-essential git wget curl zip unzip file ca-certificates openssl \
   libncurses-dev bison flex libssl-dev libelf-dev bc cpio gzip xz-utils \
@@ -104,323 +54,129 @@ sudo apt install -y \
   xorriso syslinux-common isolinux \
   nasm bochs bochs-sdl bochs-x bochsbios vgabios \
   bcc bin86
-```
 
-## 3. Cek versi GCC
+Cek tool:
 
-```bash
 gcc --version
-```
-
-Repository ini sudah disiapkan agar `kernel.sh` dapat dijalankan pada Kali Linux dengan GCC modern, termasuk GCC 15.2.0.
-
-## 4. Cek tool emulator
-
-```bash
 qemu-system-x86_64 --version
 bochs -version
-```
+Reporting Soal 1
+A. Deskripsi Soal
 
-Jika dua command tersebut menampilkan versi program, QEMU dan Bochs sudah siap digunakan.
+Pada soal pertama, dibuat sistem bootable menggunakan Linux kernel 6.1.1. Sistem ini memiliki dua root filesystem:
 
----
+single.gz untuk single-user mode.
+multi.gz untuk multi-user mode.
 
-# Reporting Soal 1
+Selain itu, dibuat juga ISO bootable farewell.iso dan script QEMU untuk menjalankan seluruh mode tersebut.
 
-## A. Deskripsi Soal
+Output utama Soal 1:
 
-Pada soal pertama, dibuat sistem bootable berbasis Linux kernel 6.1.1. Sistem ini memiliki dua mode root filesystem, yaitu single-user dan multi-user.
-
-Output utama yang dihasilkan Soal 1 adalah:
-
-```text
 soal_1/osboot/bzImage
 soal_1/osboot/single.gz
 soal_1/osboot/multi.gz
 soal_1/osboot/farewell.iso
-```
+B. File yang Digunakan
+soal_1/kernel.sh
+soal_1/single.sh
+soal_1/multi.sh
+soal_1/iso.sh
+soal_1/qemu.sh
+soal_1/backup.sh
+soal_1/osboot/
+C. Kode Lengkap kernel.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap kernel.sh</summary>
+MD
 
-Script yang digunakan:
+cat soal_1/kernel.sh >> README.md
 
-* `kernel.sh` untuk download, patch, konfigurasi, dan compile Linux kernel 6.1.1.
-* `single.sh` untuk membuat initramfs single-user.
-* `multi.sh` untuk membuat initramfs multi-user.
-* `iso.sh` untuk membuat ISO bootable.
-* `qemu.sh` untuk menjalankan sistem menggunakan QEMU.
-* `backup.sh` untuk membuat backup hasil build.
+cat >> README.md <<'MD'
+</details>
+D. Kode Lengkap single.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap single.sh</summary>
+MD
 
----
+cat soal_1/single.sh >> README.md
 
-## B. File yang Digunakan
+cat >> README.md <<'MD'
+</details>
+E. Kode Lengkap multi.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap multi.sh</summary>
+MD
 
-File utama yang dikumpulkan:
+cat soal_1/multi.sh >> README.md
 
-* `soal_1/kernel.sh`
-* `soal_1/single.sh`
-* `soal_1/multi.sh`
-* `soal_1/iso.sh`
-* `soal_1/qemu.sh`
-* `soal_1/backup.sh`
-* `soal_1/osboot/`
+cat >> README.md <<'MD'
+</details>
+F. Kode Lengkap iso.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap iso.sh</summary>
+MD
 
-File output runtime:
+cat soal_1/iso.sh >> README.md
 
-* `soal_1/osboot/bzImage`
-* `soal_1/osboot/single.gz`
-* `soal_1/osboot/multi.gz`
-* `soal_1/osboot/farewell.iso`
-* `soal_1/osboot/farewell_backup_[timestamp].zip`
+cat >> README.md <<'MD'
+</details>
+G. Kode Lengkap qemu.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap qemu.sh</summary>
+MD
 
----
+cat soal_1/qemu.sh >> README.md
 
-## C. Cara Menjalankan Soal 1
+cat >> README.md <<'MD'
+</details>
+H. Kode Lengkap backup.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap backup.sh</summary>
+MD
 
-Semua langkah pada bagian ini dimulai dari root repository.
+cat soal_1/backup.sh >> README.md
 
-### 1. Masuk ke folder `soal_1`
+cat >> README.md <<'MD'
+</details>
+I. Cara Menjalankan Soal 1
 
-```bash
+Semua langkah dimulai dari root repository.
+
+1. Masuk ke folder Soal 1
 cd soal_1
-```
-
-### 2. Beri permission executable
-
-```bash
 chmod +x *.sh
-```
-
-### 3. Cek struktur awal
-
-```bash
-ls -la
-```
-
-Output minimal yang diharapkan:
-
-```text
-.config
-backup.sh
-iso.sh
-kernel.sh
-multi.sh
-osboot
-qemu.sh
-single.sh
-```
-
-Jika `.config` tidak terlihat dengan `ls`, gunakan:
-
-```bash
-ls -la
-```
-
----
-
-## D. Build Kernel Linux 6.1.1
-
-### 1. Jalankan script kernel
-
-```bash
+2. Build kernel
 ./kernel.sh
-```
 
-Jika ingin build bersih dari awal:
+Jika ingin build bersih:
 
-```bash
 ./kernel.sh --clean
-```
 
-Proses ini membutuhkan waktu cukup lama karena script akan mengekstrak dan mengompilasi Linux kernel.
+Cek hasil:
 
-### 2. Cek hasil kernel
-
-```bash
 ls -lh osboot/bzImage
-```
-
-Output yang diharapkan adalah file `bzImage` muncul di folder `osboot`.
-
-### 3. Cek `.config`
-
-```bash
 ls -lh .config
-```
-
-File `.config` berisi konfigurasi kernel yang digunakan saat build.
-
----
-
-## E. Build Single-user Filesystem
-
-### 1. Jalankan script single-user
-
-```bash
+3. Build single-user filesystem
 ./single.sh
-```
 
-### 2. Cek hasil initramfs single-user
+Cek:
 
-```bash
 ls -lh osboot/single.gz
-```
 
-Output yang diharapkan:
+Run:
 
-```text
-osboot/single.gz
-```
-
-### 3. Jalankan single-user dengan QEMU GUI
-
-```bash
 ./qemu.sh --single
-```
-
-Jika QEMU GUI bermasalah, gunakan mode serial:
-
-```bash
-./qemu.sh --single --serial
-```
-
-### 4. Uji di dalam OS single-user
-
-Setelah masuk ke shell OS, jalankan:
-
-```sh
-whoami
-ls /
-pwd
-cd /root
-pwd
-touch /tmp/test_single
-ls -l /tmp/test_single
-```
-
-Output yang diharapkan:
-
-```text
-whoami -> root
-cd /root -> berhasil
-touch /tmp/test_single -> berhasil
-```
-
-### 5. Uji jaringan single-user
-
-Jika script `net-up` tersedia di dalam OS, jalankan:
-
-```sh
-net-up
-nettest
-```
-
-Jika perlu konfigurasi manual, jalankan:
-
-```sh
-mkdir -p /etc
-ip link set lo up
-ip link set eth0 up
-ip addr flush dev eth0
-ip addr add 10.0.2.15/24 dev eth0
-route del default 2>/dev/null
-route add default gw 10.0.2.2 eth0 2>/dev/null || route add default gw 10.0.2.2
-echo "nameserver 10.0.2.3" > /etc/resolv.conf
-ip addr
-route -n
-ping -c 4 10.0.2.2
-ping -c 4 8.8.8.8
-ping -c 4 google.com
-wget -O - http://example.com
-```
-
-Jika `ping` dan `wget` berhasil, jaringan QEMU sudah berjalan.
-
-### 6. Keluar dari QEMU
-
-Untuk QEMU GUI, pilih:
-
-```text
-Machine -> Quit
-```
-
-Untuk mode serial:
-
-```text
-Ctrl + A, lalu X
-```
-
----
-
-## F. Build Multi-user Filesystem
-
-### 1. Jalankan script multi-user
-
-```bash
-./multi.sh
-```
-
-### 2. Cek hasil initramfs multi-user
-
-```bash
-ls -lh osboot/multi.gz
-```
-
-Output yang diharapkan:
-
-```text
-osboot/multi.gz
-```
-
-### 3. Jalankan multi-user dengan QEMU GUI
-
-```bash
-./qemu.sh --multi
-```
-
-Jika QEMU GUI bermasalah, gunakan mode serial:
-
-```bash
-./qemu.sh --multi --serial
-```
-
-### 4. Login sebagai root
-
-```text
-login: root
-password: root123
-```
-
-### 5. Uji root
 
 Di dalam OS:
 
-```sh
 whoami
 ls /
-ls /home
 cd /root
-pwd
-cd /home/henn
-cd /home/hann
-cd /home/viii
-cd /home/kids
-```
+touch /tmp/test_single
+ls -l /tmp/test_single
+4. Test network single-user
 
-Output yang diharapkan:
+Di dalam QEMU:
 
-```text
-root dapat mengakses /root dan semua folder /home
-```
-
-### 6. Uji jaringan multi-user
-
-```sh
 net-up
 nettest
-```
 
-Jika perlu manual:
+Jika ingin manual:
 
-```sh
 mkdir -p /etc
 ip link set lo up
 ip link set eth0 up
@@ -433,40 +189,51 @@ ping -c 4 10.0.2.2
 ping -c 4 8.8.8.8
 ping -c 4 google.com
 wget -O - http://example.com
-```
+5. Build multi-user filesystem
+./multi.sh
 
----
+Cek:
 
-## G. Uji User dan Permission Multi-user
+ls -lh osboot/multi.gz
 
-Akun yang tersedia:
+Run:
 
-```text
+./qemu.sh --multi
+
+Login akun:
+
 root : root123
 henn : henn123
 hann : hann123
 viii : viii123
 kids : kids123
-```
+6. Test permission root
 
-### 1. Uji user `henn`
+Login sebagai root:
 
-Jalankan QEMU multi-user:
+root
+root123
 
-```bash
-./qemu.sh --multi
-```
+Command:
+
+whoami
+cd /root
+cd /home/henn
+cd /home/hann
+cd /home/viii
+cd /home/kids
+
+Root harus bisa mengakses semua folder.
+
+7. Test permission henn
 
 Login:
 
-```text
-login: henn
-password: henn123
-```
+henn
+henn123
 
-Tes:
+Command:
 
-```sh
 whoami
 cd /home/henn
 touch test_henn
@@ -477,27 +244,20 @@ touch test_from_henn
 cd /home/kids
 touch test_from_henn
 cd /root
-```
 
-Hasil yang diharapkan:
+Hasil:
 
-```text
-henn dapat mengakses /home/henn, /home/hann, /home/viii, dan /home/kids.
-henn tidak dapat mengakses /root.
-```
-
-### 2. Uji user `hann`
+henn bisa akses /home/henn, /home/hann, /home/viii, /home/kids.
+henn tidak bisa akses /root.
+8. Test permission hann
 
 Login:
 
-```text
-login: hann
-password: hann123
-```
+hann
+hann123
 
-Tes:
+Command:
 
-```sh
 whoami
 cd /home/hann
 touch test_hann
@@ -507,27 +267,20 @@ cd /home/kids
 touch test_from_hann
 cd /home/henn
 cd /root
-```
 
-Hasil yang diharapkan:
+Hasil:
 
-```text
-hann dapat mengakses /home/hann, /home/viii, dan /home/kids.
-hann tidak dapat mengakses /home/henn dan /root.
-```
-
-### 3. Uji user `viii`
+hann bisa akses /home/hann, /home/viii, /home/kids.
+hann tidak bisa akses /home/henn dan /root.
+9. Test permission viii
 
 Login:
 
-```text
-login: viii
-password: viii123
-```
+viii
+viii123
 
-Tes:
+Command:
 
-```sh
 whoami
 cd /home/viii
 touch test_viii
@@ -536,27 +289,20 @@ touch test_from_viii
 cd /home/henn
 cd /home/hann
 cd /root
-```
 
-Hasil yang diharapkan:
+Hasil:
 
-```text
-viii dapat mengakses /home/viii dan /home/kids.
-viii tidak dapat mengakses /home/henn, /home/hann, dan /root.
-```
-
-### 4. Uji user `kids`
+viii bisa akses /home/viii dan /home/kids.
+viii tidak bisa akses /home/henn, /home/hann, dan /root.
+10. Test permission kids
 
 Login:
 
-```text
-login: kids
-password: kids123
-```
+kids
+kids123
 
-Tes:
+Command:
 
-```sh
 whoami
 cd /home/kids
 touch test_kids
@@ -564,233 +310,114 @@ cd /home/henn
 cd /home/hann
 cd /home/viii
 cd /root
-```
 
-Hasil yang diharapkan:
+Hasil:
 
-```text
-kids hanya dapat mengakses /home/kids.
-kids tidak dapat mengakses /home/henn, /home/hann, /home/viii, dan /root.
-```
+kids hanya bisa akses /home/kids.
+kids tidak bisa akses /home/henn, /home/hann, /home/viii, dan /root.
+11. Test package manager party
 
----
+Login sebagai root di multi-user:
 
-## H. Uji Package Manager `party`
-
-Jalankan QEMU multi-user dan login sebagai root:
-
-```bash
-./qemu.sh --multi
-```
-
-Login:
-
-```text
-root
-root123
-```
-
-Di dalam OS:
-
-```sh
 party help
 party list
 party install hello
 hello-party
-```
 
 Output yang diharapkan:
 
-```text
 Hello from Farewell Party package manager!
-```
-
----
-
-## I. Uji FUSE Demo
-
-Masih di multi-user sebagai root:
-
-```sh
+12. Test FUSE demo
 party install fuse-demo
 mkdir -p /mnt/fuse
 fuse-demo /mnt/fuse &
 cat /mnt/fuse/hello.txt
-```
-
-Output yang diharapkan salah satu dari berikut:
-
-```text
-Farewell Party FUSE works!
-```
-
-atau fallback demo:
-
-```text
-Farewell Party FUSE fallback demo works!
-```
-
----
-
-## J. Build ISO Bootable
-
-### 1. Jalankan script ISO
-
-```bash
-./iso.sh
-```
-
-### 2. Cek hasil ISO
-
-```bash
-ls -lh osboot/farewell.iso
-```
 
 Output yang diharapkan:
 
-```text
-osboot/farewell.iso
-```
+Farewell Party FUSE works!
 
-### 3. Jalankan ISO dengan QEMU
+atau fallback:
 
-```bash
+Farewell Party FUSE fallback demo works!
+13. Build ISO bootable
+./iso.sh
+
+Cek:
+
+ls -lh osboot/farewell.iso
+
+Run ISO:
+
 ./qemu.sh --all
-```
 
-Pada menu ISO, pilih:
+Pilih menu single-user, lalu tes:
 
-```text
-Boot single-user filesystem
-```
-
-Setelah masuk OS, tes:
-
-```sh
 whoami
 ls /
-```
 
-Kemudian tutup QEMU dan jalankan lagi:
+Run lagi:
 
-```bash
 ./qemu.sh --all
-```
 
-Pilih:
+Pilih menu multi-user, login root:
 
-```text
-Boot multi-user filesystem
-```
-
-Login sebagai root:
-
-```text
 root
 root123
-```
 
 Tes:
 
-```sh
 whoami
 ls /home
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 henn hann viii kids
-```
+14. Backup hasil build
 
----
+Backup dilakukan paling terakhir.
 
-## K. Backup Hasil Build
-
-Backup dilakukan paling terakhir setelah semua screenshot dan pengujian selesai.
-
-```bash
 ./backup.sh
-```
 
-Cek hasil backup:
+Cek:
 
-```bash
 ls -lh osboot
-```
 
-Output yang diharapkan berupa file:
+Output berupa:
 
-```text
 farewell_backup_DDMMYYYY-HHMMSS.zip
-```
+J. Penjelasan Kode Soal 1
+1. kernel.sh
 
----
+Script ini mengunduh, melakukan patch, mengonfigurasi, dan mengompilasi Linux kernel 6.1.1. Patch dilakukan agar kernel tetap dapat dikompilasi pada GCC modern, termasuk GCC 15.2.0. Output utama script ini adalah osboot/bzImage dan .config.
 
-## L. Penjelasan Script Soal 1
+2. single.sh
 
-### 1. `kernel.sh`
+Script ini membuat root filesystem single-user berbasis BusyBox. Sistem langsung masuk ke shell root setelah boot. Script ini juga membuat /init, mount proc, sysfs, devtmpfs, dan tmpfs.
 
-Script ini mengunduh dan mengompilasi Linux kernel 6.1.1. Script juga melakukan konfigurasi fitur penting seperti initramfs, `devtmpfs`, `procfs`, `sysfs`, console, network device, dan FUSE.
+3. multi.sh
 
-### 2. `single.sh`
+Script ini membuat root filesystem multi-user. Di dalamnya terdapat user root, henn, hann, viii, dan kids, lengkap dengan password, group, home directory, permission, networking, dan package manager party.
 
-Script ini membuat root filesystem single-user berbasis BusyBox. Mode ini langsung masuk ke shell root dan digunakan untuk pengujian sistem minimal.
+4. iso.sh
 
-### 3. `multi.sh`
+Script ini membuat ISO bootable menggunakan bzImage, single.gz, dan multi.gz. ISO memiliki menu untuk boot ke single-user atau multi-user.
 
-Script ini membuat root filesystem multi-user. Di dalamnya dibuat user `root`, `henn`, `hann`, `viii`, dan `kids`, lengkap dengan permission direktori `/home` sesuai aturan akses.
+5. qemu.sh
 
-### 4. `iso.sh`
+Script ini menjalankan sistem menggunakan QEMU. Mode yang tersedia adalah --single, --multi, dan --all.
 
-Script ini membuat ISO bootable yang dapat memilih boot ke single-user atau multi-user filesystem.
+6. backup.sh
 
-### 5. `qemu.sh`
+Script ini membuat backup hasil build Soal 1 ke file ZIP bertimestamp.
 
-Script ini menjalankan sistem menggunakan QEMU. Mode yang tersedia:
+Reporting Soal 2
+A. Deskripsi Soal
 
-```bash
-./qemu.sh --single
-./qemu.sh --multi
-./qemu.sh --all
-```
+Pada soal kedua, dibuat sistem operasi sederhana 16-bit menggunakan bootloader dan kernel. Bootloader membaca kernel dari floppy image, lalu kernel menjalankan shell sederhana.
 
-Mode serial tersedia sebagai cadangan:
+Command yang tersedia:
 
-```bash
-./qemu.sh --single --serial
-./qemu.sh --multi --serial
-./qemu.sh --all --serial
-```
-
-### 6. `backup.sh`
-
-Script ini membuat backup output build Soal 1 ke file ZIP timestamp.
-
----
-
-## M. Hasil Akhir Soal 1
-
-Setelah semua proses dijalankan, folder `soal_1/osboot` berisi:
-
-```text
-bzImage
-single.gz
-multi.gz
-farewell.iso
-```
-
----
-
-# Reporting Soal 2
-
-## A. Deskripsi Soal
-
-Pada soal kedua, dibuat sistem operasi sederhana menggunakan template bootloader dan kernel. Bootloader memuat kernel ke memori, kemudian kernel menjalankan shell sederhana.
-
-Shell pada OS ini dapat menerima command:
-
-```text
 check
 add
 sub
@@ -800,405 +427,231 @@ triangle
 clear
 help
 about
-```
+B. File yang Digunakan
+soal_2/Makefile
+soal_2/README.md
+soal_2/bochsrc.txt
+soal_2/bootloader.asm
+soal_2/build.sh
+soal_2/kernel.asm
+soal_2/kernel.c
+C. Kode Lengkap bootloader.asm
+<details> <summary>Klik untuk membuka/menutup kode lengkap bootloader.asm</summary>
+MD
 
-Program dijalankan menggunakan Bochs.
+cat soal_2/bootloader.asm >> README.md
 
----
+cat >> README.md <<'MD'
+</details>
+D. Kode Lengkap kernel.asm
+<details> <summary>Klik untuk membuka/menutup kode lengkap kernel.asm</summary>
+MD
 
-## B. File yang Digunakan
+cat soal_2/kernel.asm >> README.md
 
-File utama:
+cat >> README.md <<'MD'
+</details>
+E. Kode Lengkap kernel.c
+<details> <summary>Klik untuk membuka/menutup kode lengkap kernel.c</summary>
+MD
 
-* `soal_2/Makefile`
-* `soal_2/README.md`
-* `soal_2/bochsrc.txt`
-* `soal_2/bootloader.asm`
-* `soal_2/build.sh`
-* `soal_2/kernel.asm`
-* `soal_2/kernel.c`
+cat soal_2/kernel.c >> README.md
 
-File runtime yang dibuat saat build:
+cat >> README.md <<'MD'
+</details>
+F. Kode Lengkap Makefile
+<details> <summary>Klik untuk membuka/menutup kode lengkap Makefile</summary>
+MD
 
-* `soal_2/floppy.img`
-* `soal_2/bootloader.bin`
-* `soal_2/kernel.bin`
-* `soal_2/kernel.o`
-* `soal_2/kernel-asm.o`
-* `soal_2/bochslog.txt`
+cat soal_2/Makefile >> README.md
 
-File runtime tersebut dapat dihapus karena bisa dibuat ulang dengan `./build.sh`.
+cat >> README.md <<'MD'
+</details>
+G. Kode Lengkap build.sh
+<details> <summary>Klik untuk membuka/menutup kode lengkap build.sh</summary>
+MD
 
----
+cat soal_2/build.sh >> README.md
 
-## C. Cara Menjalankan Soal 2
+cat >> README.md <<'MD'
+</details>
+H. Kode Lengkap bochsrc.txt
+<details> <summary>Klik untuk membuka/menutup kode lengkap bochsrc.txt</summary>
+MD
 
-Semua langkah pada bagian ini dimulai dari root repository.
+cat soal_2/bochsrc.txt >> README.md
 
-### 1. Masuk ke folder `soal_2`
+cat >> README.md <<'MD'
+</details>
+I. Cara Menjalankan Soal 2
 
-```bash
+Semua langkah dimulai dari root repository.
+
+1. Masuk ke folder Soal 2
 cd soal_2
-```
-
-### 2. Beri permission executable
-
-```bash
 chmod +x build.sh
-```
-
-### 3. Bersihkan hasil build lama
-
-```bash
+2. Hapus hasil build lama
 rm -f floppy.img bootloader.bin kernel.bin kernel.o kernel-asm.o bochslog.txt
-```
-
-### 4. Build Soal 2
-
-```bash
+3. Build
 ./build.sh
-```
 
-Output yang diharapkan adalah file `floppy.img` berhasil dibuat.
+Cek:
 
-Cek hasil build:
-
-```bash
 ls -lh floppy.img kernel.bin
-```
-
-### 5. Jalankan Soal 2 dengan Bochs
-
-```bash
+4. Run dengan Bochs
 ./build.sh --run
-```
 
-Jika Bochs masuk debugger dan menampilkan:
+Jika masuk debugger:
 
-```text
 <bochs:1>
-```
 
 ketik:
 
-```text
 c
-```
 
-lalu tekan Enter.
+lalu Enter.
 
-Jika muncul pop-up Bochs, pilih `Continue` atau `Alwayscont`.
-
----
-
-## D. Uji Command Soal 2
-
-Setelah OS tampil dan prompt muncul, jalankan command berikut satu per satu.
-
-### 1. Uji `check`
-
-```text
+J. Uji Command Soal 2
+1. check
 check
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 ok
-```
-
-### 2. Uji `add`
-
-```text
+2. add
 add 5 3
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 8
-```
-
-### 3. Uji `sub`
-
-```text
+3. sub
 sub 10 2
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 8
-```
-
-### 4. Uji `fac`
-
-```text
+4. fac
 fac 6
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 720
-```
 
-Uji batas factorial:
+Limit:
 
-```text
 fac 120
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 know your limit little bro.
-```
-
-### 5. Uji `season`
-
-```text
+5. season
 season winter
 season spring
 season summer
 season fall
 season radiant
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 winter mode
 spring mode
 summer mode
 fall mode
 radiant mode
-```
-
-Warna teks akan berubah sesuai mode season.
-
-### 6. Uji `triangle`
-
-```text
+6. triangle
 triangle 5
-```
 
-Output yang diharapkan:
+Output:
 
-```text
 x
 xx
 xxx
 xxxx
 xxxxx
-```
-
-### 7. Uji `help`
-
-```text
+7. help
 help
-```
 
-Output yang diharapkan adalah daftar command yang tersedia.
+Output berupa daftar command.
 
-### 8. Uji `about`
-
-```text
+8. about
 about
-```
 
-Output yang diharapkan adalah informasi singkat OS.
+Output berupa informasi OS.
 
-### 9. Uji `clear`
-
-```text
+9. clear
 clear
-```
 
-Layar akan dibersihkan.
+Layar dibersihkan.
 
----
+K. Penjelasan Kode Soal 2
+1. bootloader.asm
 
-## E. Cara Keluar dari Bochs
+File ini adalah bootloader yang dijalankan pertama kali oleh BIOS. Bootloader membaca kernel dari floppy image menggunakan BIOS interrupt int 0x13, lalu memindahkan eksekusi ke kernel.
 
-Jika menggunakan window Bochs, klik tombol close atau power pada window Bochs.
+2. kernel.asm
 
-Jika berada di debugger Bochs, ketik:
+File ini menjadi penghubung antara assembly dan C. File ini menyediakan _start, _putInMemory, dan _getChar. Fungsi _putInMemory digunakan untuk menulis ke video memory, sedangkan _getChar membaca keyboard menggunakan BIOS interrupt int 0x16.
 
-```text
-q
-```
+3. kernel.c
 
-lalu tekan Enter.
+File ini berisi shell utama OS. Program membaca input keyboard, membandingkan command, lalu menjalankan fungsi sesuai command. Fungsi penting di dalamnya meliputi printChar, printString, readString, parseNumber, printNumber, commandAdd, commandSub, commandFac, commandSeason, dan commandTriangle.
 
-Jika menjalankan dari terminal dan ingin menghentikan proses, tekan:
+4. Makefile
 
-```text
-Ctrl + C
-```
+File ini mengatur proses pembuatan floppy image, bootloader binary, kernel object, kernel binary, dan penulisan semuanya ke floppy.img.
 
----
+5. build.sh
 
-## F. Penjelasan Kode Soal 2
+Script ini memudahkan proses build dan run. ./build.sh digunakan untuk build, sedangkan ./build.sh --run digunakan untuk menjalankan Bochs.
 
-### 1. `bootloader.asm`
+Cleanup Setelah Testing
 
-File ini berfungsi sebagai bootloader. Bootloader dijalankan pertama kali oleh BIOS, kemudian membaca kernel dari floppy image dan memindahkannya ke memori.
+Jalankan dari root repository.
 
-### 2. `kernel.asm`
-
-File ini berisi entry point assembly, fungsi `putInMemory`, dan fungsi `_getChar`. Fungsi `_getChar` membaca input keyboard menggunakan interrupt BIOS.
-
-### 3. `kernel.c`
-
-File ini berisi shell sederhana dan implementasi command. Command yang tersedia meliputi `check`, `add`, `sub`, `fac`, `season`, `triangle`, `clear`, `help`, dan `about`.
-
-### 4. `Makefile`
-
-File ini mengatur proses build bootloader, kernel, dan floppy image.
-
-### 5. `build.sh`
-
-Script ini mempermudah proses build dan run. Untuk build digunakan:
-
-```bash
-./build.sh
-```
-
-Untuk run digunakan:
-
-```bash
-./build.sh --run
-```
-
----
-
-## G. Hasil Akhir Soal 2
-
-Struktur final ZIP tetap bersih:
-
-```text
-soal_2/
-├── Makefile
-├── README.md
-├── bochsrc.txt
-├── bootloader.asm
-├── build.sh
-├── kernel.asm
-└── kernel.c
-```
-
-File hasil build dapat dibuat ulang saat runtime.
-
----
-
-# Cleanup Setelah Testing
-
-Command ini digunakan untuk mengembalikan repository ke kondisi bersih setelah testing. Jalankan dari root repository.
-
-## 1. Stop QEMU jika masih berjalan
-
-Jika QEMU masih terbuka, tutup window QEMU. Jika proses masih berjalan di background:
-
-```bash
+1. Stop emulator
 pkill qemu-system-x86_64 2>/dev/null || true
-```
-
-## 2. Stop Bochs jika masih berjalan
-
-```bash
 pkill bochs 2>/dev/null || true
-```
-
-## 3. Bersihkan runtime Soal 1
-
-```bash
+2. Bersihkan runtime Soal 1
 rm -rf soal_1/linux-6.1.1
 rm -f soal_1/linux-6.1.1.tar.xz
 rm -rf soal_1/rootfs_single
 rm -rf soal_1/rootfs_multi
 rm -rf soal_1/iso_root
-```
 
-Jika ingin mengosongkan hasil build `osboot`, jalankan:
+Jika ingin mengosongkan output osboot:
 
-```bash
 rm -f soal_1/osboot/bzImage
 rm -f soal_1/osboot/single.gz
 rm -f soal_1/osboot/multi.gz
 rm -f soal_1/osboot/farewell.iso
-```
-
-Folder `soal_1/osboot` tetap dipertahankan.
-
-## 4. Bersihkan runtime Soal 2
-
-```bash
+3. Bersihkan runtime Soal 2
 rm -f soal_2/floppy.img
 rm -f soal_2/bootloader.bin
 rm -f soal_2/kernel.bin
 rm -f soal_2/kernel.o
 rm -f soal_2/kernel-asm.o
 rm -f soal_2/bochslog.txt
-```
-
-## 5. Cek struktur akhir
-
-```bash
-tree -a
-```
-
-Struktur akhir yang diharapkan:
-
-```text
-.
-├── soal_1
-│   ├── backup.sh
-│   ├── iso.sh
-│   ├── kernel.sh
-│   ├── multi.sh
-│   ├── osboot
-│   ├── qemu.sh
-│   └── single.sh
-└── soal_2
-    ├── bochsrc.txt
-    ├── bootloader.asm
-    ├── build.sh
-    ├── kernel.asm
-    ├── kernel.c
-    ├── Makefile
-    └── README.md
-```
-
----
-
-# Urutan Screenshot yang Disarankan
-
-## Soal 1
-
-```text
+Urutan Screenshot yang Disarankan
+Soal 1
 1. Struktur folder soal_1.
-2. Hasil ./kernel.sh atau bukti osboot/bzImage terbentuk.
-3. Hasil ./single.sh dan file osboot/single.gz.
-4. Boot ./qemu.sh --single dan hasil whoami.
-5. Hasil net-up/nettest atau ping/wget.
-6. Hasil ./multi.sh dan file osboot/multi.gz.
-7. Login root pada multi-user.
-8. Tes permission user henn.
-9. Tes permission user hann.
-10. Tes permission user viii.
-11. Tes permission user kids.
-12. Hasil party help, party list, party install hello.
-13. Hasil fuse-demo.
-14. Hasil ./iso.sh dan file osboot/farewell.iso.
-15. Boot ./qemu.sh --all ke single-user.
-16. Boot ./qemu.sh --all ke multi-user.
-17. Hasil ./backup.sh.
-```
-
-## Soal 2
-
-```text
+2. Build kernel atau bukti bzImage terbentuk.
+3. Build single.gz.
+4. Boot single-user.
+5. whoami di single-user.
+6. Test ping dan wget.
+7. Build multi.gz.
+8. Login root di multi-user.
+9. Test permission henn.
+10. Test permission hann.
+11. Test permission viii.
+12. Test permission kids.
+13. Test party.
+14. Test fuse-demo.
+15. Build farewell.iso.
+16. Boot ISO single-user.
+17. Boot ISO multi-user.
+18. Backup hasil build.
+Soal 2
 1. Struktur folder soal_2.
 2. Hasil ./build.sh.
 3. Bochs berhasil boot.
@@ -1207,37 +660,23 @@ Struktur akhir yang diharapkan:
 6. sub 10 2 -> 8.
 7. fac 6 -> 720.
 8. fac 120 -> know your limit little bro.
-9. season winter/spring/summer/fall/radiant.
+9. season radiant.
 10. triangle 5.
 11. help.
 12. about.
 13. clear.
-```
+Zip Final
 
----
+Dari home:
 
-# Zip Final
-
-Setelah semua file bersih dan repository sudah berada di folder `SISOP-5-2026-IT-124`, buat ZIP final dari home:
-
-```bash
 cd ~
 zip -r SISOP-5-2026-IT-124.zip SISOP-5-2026-IT-124
-```
 
-Cek hasil ZIP:
+Cek:
 
-```bash
 ls -lh SISOP-5-2026-IT-124.zip
-```
+Kesimpulan
 
----
-
-# Kesimpulan
-
-Dari dua soal pada Modul 5 ini, saya memahami beberapa konsep penting dalam Sistem Operasi.
-
-* **Soal 1** memperlihatkan proses build kernel, pembuatan root filesystem, konfigurasi user, permission, networking, package manager sederhana, pembuatan ISO bootable, serta proses boot menggunakan QEMU.
-* **Soal 2** memperlihatkan cara kerja bootloader dan kernel sederhana, penggunaan BIOS interrupt untuk input keyboard dan output layar, serta implementasi command shell sederhana pada sistem operasi 16-bit.
-
-Secara keseluruhan, seluruh soal dapat dijalankan secara bertahap mulai dari proses build, booting emulator, pengujian user dan permission, pengujian jaringan, hingga pengujian command pada kernel sederhana.
+Pada Modul 5 ini, Soal 1 memperlihatkan proses build kernel, pembuatan initramfs, konfigurasi user, permission, networking, QEMU, ISO bootable, dan backup. Soal 2 memperlihatkan cara kerja bootloader, kernel sederhana, input keyboard, output layar, serta command shell sederhana yang berjalan pada Bochs.
+MD
+EOF
